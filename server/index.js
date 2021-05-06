@@ -17,6 +17,13 @@ app.get('/', (req, res) => {
   res.send('yoyo');
 });
 
+app.get('/api/user/profile', verifyToken, (req, res) => {
+  res.send({
+    success: true,
+    data: req.user,
+  });
+});
+
 app.use('/api/users', authRoutes);
 
 mongoose.connect(`mongodb+srv://${mongoUsername}:${mongoPassword}@reactnativecoursecluste.uxith.mongodb.net/auth_system?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })

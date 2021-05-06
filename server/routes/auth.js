@@ -30,6 +30,10 @@ const loginValidate = [
     .withMessage('Password must be at least 6 characters long.'),
 ];
 
+const generateToken = (user) => {
+  return jwt.sign({ _id: user._id, email: user.email, fullName: user.fullName, }, secret);
+}
+
 router.post('/register', validate, async (req, res) => {
   // Validate the form:
   const errors = validationResult(req);
@@ -37,7 +41,10 @@ router.post('/register', validate, async (req, res) => {
 
   // Check if email already exists:
   const userExists = await User.findOne({ email: req.body.email });
-  if (userExists) return res.status(400).send('Email already exists.');
+  if (userExists) return res.status(400).send({
+    success: false,
+    message: 'Email already exists',
+  });
 
   // Hash the password:
   const salt = await bcrypt.genSalt();
@@ -51,13 +58,21 @@ router.post('/register', validate, async (req, res) => {
 
   try {
     const savedUser = await user.save();
+    const token = generateToken(user);
     res.send({
-      id: savedUser._id,
-      fullName: savedUser.fullName,
-      email: savedUser.email,
+      success: true,
+      data: {
+        id: savedUser._id,
+        fullName: savedUser.fullName,
+        email: savedUser.email,
+      },
+      token,
     });
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send({
+      success: false,
+      err,
+    });
   }
 });
 
@@ -68,16 +83,26 @@ router.post('/login', loginValidate, async (req, res) => {
 
   // Check if email exists:
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(404).send('Invalid email or password');
+  if (!user) return res.status(404).send({
+    success: false,
+    message: 'User is not registered',
+  });
 
   // Check if password is correct:
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(404).send('Invalid email or or password');
+  if (!validPassword) return res.status(404).send({
+    success: false,
+    message: 'Invalid email or or password',
+  });
 
   // Create and assign a token:
-  const token = jwt.sign({ _id: user._id, email: user.email }, secret);
+  const token = generateToken(user);
 
-  res.header('auth-token', token).send({ message: 'Logged in successfully!', token });
+  res.header('auth-token', token).send({
+    success: true,
+    message: 'Logged in successfully!',
+    token
+  });
 });
 
 module.exports = router;
