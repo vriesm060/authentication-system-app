@@ -6,5 +6,7 @@
 | [Client][1] | [Server][2] |
 | :---------- | :---------- |
 
-![Authentication System App register](screenshots/authentication_system_app_001.png)
-![Authentication System App login](screenshots/authentication_system_app_002.png)
+<p float="left">
+  <img src="screenshots/authentication_system_app_001.png" alt="Authentication System App Register" width="400" />
+  <img src="screenshots/authentication_system_app_002.png" alt="Authentication System App Login" width="400" />
+</p>
